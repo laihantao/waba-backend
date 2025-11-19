@@ -6,6 +6,17 @@ export class WhatsAppController {
     this.messageService  = WhatsAppService;
   }
 
+  getMessageTemplate = async (req, res) => {
+    try {
+      const response = await this.messageService.getMessageTemplate();
+      return res.json(response.data);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      return res.status(500).send("Failed to fetch templates");
+    }
+  };
+
+
   // GET /webhook
   verifyWebhook = (req, res) => {
     const mode = req.query["hub.mode"];
@@ -44,13 +55,14 @@ export class WhatsAppController {
   };
 
   // GET /test-template?to=...
-  sendTestTemplate = async (req, res) => {
+  sendTemplate = async (req, res) => {
     try {
-      const to = req.query.to;
+      const to = req.body.to;
+      const template = req.body.templateName;
 
-      console.log('to: ', to)
+      console.log('Send Template Param: ', req.body)
 
-      await this.messageService.sendTemplate(to, "hello_world");
+      await this.messageService.sendTemplate(to, template);
       return res.send("Template sent!");
     } catch (err) {
       console.error(err);
@@ -63,15 +75,16 @@ export class WhatsAppController {
     try {
       const to = req.body.to;
       const text = req.body.text;
+      const paramValues = req.body.paramValues;
 
       console.log("req.body: ",req.body)
       // await this.messageService.sendText(to, "Hello, this is a test text message!");
-      await this.messageService.sendText(to, text);
+      await this.messageService.sendText(to, text, "en_US");
       
       return res.send("Text message sent!");
     } catch (err) {
       console.error("SendText error:", err.response?.data || err.message);
-      return res.status(500).send("Send failed");
+      return res.status(500).send(err.response?.data);
     }
   };
 

@@ -7,6 +7,7 @@ export const config = {
     VERSION: process.env.VERSION,
     VERIFY_TOKEN: process.env.VERIFY_TOKEN,
     PHONE_ID: process.env.PHONE_NUMBER_ID,
+    WABA_ID: process.env.WABA_ID,
     TOKEN: process.env.WHATSAPP_TOKEN
   }
 };

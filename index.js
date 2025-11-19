@@ -10,6 +10,10 @@ app.use(express.json());      // ← 解析 JSON body
 
 // app.use(bodyParser.json());
 
+app.get("/", (req, res) => {
+  res.send("Server is Running :)");
+});
+
 app.use("/", whatsappRoutes);
 
 app.listen(process.env.PORT, () =>
