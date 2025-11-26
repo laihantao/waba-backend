@@ -11,7 +11,7 @@ app.use(express.json());      // ← 解析 JSON body
 // app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-  res.send("Welcome to HT dev road <3 ");
+  res.send("Welcome to HT dev road <3 - 2 ");
 });
 
 app.use("/", whatsappRoutes);
