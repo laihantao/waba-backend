@@ -1,5 +1,7 @@
 import WhatsAppService from "./services.js"
-import { config } from "../../../config/index.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export class WhatsAppController {
   constructor() {
@@ -23,7 +25,7 @@ export class WhatsAppController {
     const token = req.query["hub.verify_token"];
     const challenge = req.query["hub.challenge"];
 
-    if (mode === "subscribe" && token === config.WHATSAPP.VERIFY_TOKEN) {
+    if (mode === "subscribe" && token === process.env.VERIFY_TOKEN) {
       console.log("Webhook verified!");
       return res.status(200).send(challenge);
     }
