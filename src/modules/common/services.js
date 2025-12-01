@@ -1,5 +1,5 @@
 import pool from "../../../db.js"
-import { selectAllConfig, selectConfigByCategory,updateConfigValueByName } from "./sql.js";
+import { selectAllConfig, selectConfigByCategory,sqlUpdateConfigValueByName, selectConfigByName } from "./sql.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -7,30 +7,42 @@ dotenv.config();
 class CommonService {
 
   async getAllConfig() {
+    try {
+      const result = await pool.query(selectAllConfig);
 
-    const result = await pool.query(selectAllConfig);
-    
-    console.log('result: ', result)
+      return result.rows;
 
-    return result.rows;
+    } catch (err) {
+      console.error("getAllConfig: DB error:", err);
+      throw err;
+    }
   }
 
-  async getConfigByCategory(category) {
+  async getConfigsByCategory({category}) {
+    try {
+      console.log('param: ', param)
+      const result = await pool.query(selectConfigByCategory, [category]);
 
-    const result = await pool.query(selectConfigByCategory, [category]);
+      return result.rows;
 
-    console.log('result: ', result)
-
-    return result.rows;
+    } catch (err) {
+      console.error("getConfigByCategory: DB error:", err);
+      throw err;
+    }
   }
 
-  async updateConfigValueByName(value, name) {
+  async updateConfigValueByName({value, name}) {
+    try {
+      console.log('value: ', value)
+      console.log('name: ', name)
+      const result = await pool.query(sqlUpdateConfigValueByName, [value,name]);
 
-    const result = await pool.query(updateConfigValueByName, [value,name]);
-
-    console.log('result: ', result)
-
-    return result.rows;
+      return result.rowCount;
+    }
+    catch (err) {
+      console.error("updateConfigValueByName: DB error:", err);
+      throw err;
+    }
   }
 }
 
