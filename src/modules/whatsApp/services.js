@@ -1,46 +1,50 @@
-import { WABA_API } from "../../utils/axios.js";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { getConfig } from "../../utils/configService.js";
+import { createWabaAxios } from "../../utils/wabaApi.js";
 
 class WhatsAppService {
 
-  async getMessageTemplate() {
+    async getMessageTemplate() {
+        // Get the specific ID needed from the cache
+        const wabaId = getConfig("waba_id"); 
+        // Create a dedicated Axios instance for this call
+        const api = createWabaAxios(wabaId); 
 
-    const url = `/${process.env.WABA_ID}/message_templates?access_token=${process.env.WHATSAPP_TOKEN}`;
+        return await api.get(`/message_templates`); // baseURL already includes /vXX.X/wabaId
+    }
 
-    console.log("url: ", url)
+    // Send Text Message
+    async sendText(to, text) {
 
-    return WABA_API.get(`/${process.env.WABA_ID}/message_templates`, {
+      const wabaId = getConfig("waba_phone_id");
+        const api = createWabaAxios(wabaId);
 
-    });
-  }
+        return await api.post(`/messages`, {
+            messaging_product: "whatsapp",
+            to,
+            text: { body: text },
+        });
+    }
 
-  // 发送纯文本 Message（Session, when user reply to business account, only can send this
-  async sendText(to, text) {
-    return WABA_API.post(`/${process.env.WABA_ID}/messages`, {
-      messaging_product: "whatsapp",
-      to,
-      text: { body: text },
-    });
-  }
+    // Send Template Message
+    async sendTemplate(to, template, lang = "en_US") {
+        // Get the specific ID needed from the cache
+        const phoneNumberId = getConfig("waba_phone_id");
+        // Create a dedicated Axios instance for this call
+        const api = createWabaAxios(phoneNumberId); 
 
-  // 发送 Template
-  async sendTemplate(to, template, lang = "en_US") {
+        console.log('\nphoneNumberId: ', phoneNumberId)
+        console.log('api: ', api)
 
-    console.log("sendTemplate- to: ", to)
-    console.log("sendTemplate- template: ", template)
-
-    return WABA_API.post(`/${process.env.PHONE_NUMBER_ID}/messages`, {
-      messaging_product: "whatsapp",
-      to,
-      type: "template",
-      template: {
-        name: template,
-        language: { code: lang },
-      },
-    });
-  }
+        return api.post(`/messages`, {
+            messaging_product: "whatsapp",
+            to,
+            type: "template",
+            template: {
+                name: template,
+                language: { code: lang },
+            },
+        });
+    }
 }
 
 export default new WhatsAppService();

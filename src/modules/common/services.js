@@ -18,9 +18,8 @@ class CommonService {
     }
   }
 
-  async getConfigsByCategory({category}) {
+  async getConfigsByCategory(category) {
     try {
-      console.log('param: ', param)
       const result = await pool.query(selectConfigByCategory, [category]);
 
       return result.rows;
@@ -31,13 +30,24 @@ class CommonService {
     }
   }
 
+  async getConfigsByName(name) {
+    try {
+      console.log('param: ', param)
+      const result = await pool.query(selectConfigByName, [name]);
+
+      return result.rows;
+
+    } catch (err) {
+      console.error("getConfigsByName: DB error:", err);
+      throw err;
+    }
+  }
+
   async updateConfigValueByName({value, name}) {
     try {
-      console.log('value: ', value)
-      console.log('name: ', name)
       const result = await pool.query(sqlUpdateConfigValueByName, [value,name]);
 
-      return result.rowCount;
+      return result.rows;
     }
     catch (err) {
       console.error("updateConfigValueByName: DB error:", err);

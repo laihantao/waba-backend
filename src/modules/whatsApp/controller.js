@@ -11,10 +11,19 @@ export class WhatsAppController {
   getMessageTemplate = async (req, res) => {
     try {
       const response = await this.messageService.getMessageTemplate();
+
       return res.json(response.data);
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      return res.status(500).send("Failed to fetch templates");
+    } 
+    catch (err) {
+      console.error("\nController - getMessageTemplate:", err.response?.data || err.message);
+
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.error || err.message || "Unknown error";
+
+      return res.status(status).json({
+        success: false,
+        error: message,
+      });
     }
   };
 
@@ -66,9 +75,17 @@ export class WhatsAppController {
 
       await this.messageService.sendTemplate(to, template);
       return res.send("Template sent!");
-    } catch (err) {
-      console.error(err);
-      return res.status(500).send("Send failed");
+    } 
+    catch (err) {
+      console.error("\nController - sendTemplate:", err.response?.data || err.message);
+
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.error || err.message || "Unknown error";
+
+      return res.status(status).json({
+        success: false,
+        error: message,
+      });
     }
   };
 
@@ -84,9 +101,17 @@ export class WhatsAppController {
       await this.messageService.sendText(to, text, "en_US");
       
       return res.send("Text message sent!");
-    } catch (err) {
-      console.error("SendText error:", err.response?.data || err.message);
-      return res.status(500).send(err.response?.data);
+    } 
+    catch (err) {
+      console.error("\nController - sendTestText:", err.response?.data || err.message);
+
+      const status = err.response?.status || 500;
+      const message = err.response?.data?.error || err.message || "Unknown error";
+
+      return res.status(status).json({
+        success: false,
+        error: message,
+      });
     }
   };
 

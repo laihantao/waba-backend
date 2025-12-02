@@ -43,7 +43,7 @@ export class CommonController {
         });
       }
 
-      const data = await this.service.getConfigsByCategory(req.query);
+      const data = await this.service.getConfigsByCategory(req.query.category);
 
       console.log('Data from SQL: ', data)
       
@@ -60,6 +60,37 @@ export class CommonController {
       return res.status(500).json({
         success: false,
         message: "getConfigByCategory: Failed to fetch data",
+      });
+    }
+  };
+
+  getConfigByName = async (req, res) => {
+    try {
+
+      if (!req.query?.category) {
+        return res.status(400).json({
+          success: false,
+          message: "getConfigByName: Missing required query parameter: Name",
+        });
+      }
+
+      const data = await this.service.getConfigByName(req.query.name);
+
+      console.log('Data from SQL: ', data)
+      
+      return res.status(200).json({
+        success: true,
+        total: data?.length ?? 0,
+        data,
+      });
+
+    } catch (err) {
+
+      console.error(err.response?.data || err.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "getConfigByName: Failed to fetch data",
       });
     }
   };
