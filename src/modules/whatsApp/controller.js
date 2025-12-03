@@ -73,17 +73,19 @@ export class WhatsAppController {
 
       console.log('Send Template Param: ', req.body)
 
-      await this.messageService.sendTemplate(to, template);
-      return res.send("Template sent!");
+      const result = await this.messageService.sendTemplate(to, template);
+
+      return res.status(200).json({
+        data: result.data,
+      });
     } 
     catch (err) {
-      console.error("\nController - sendTemplate:", err.response?.data || err.message);
+      console.error("\nWhatsAppController - sendTemplate:", err.response?.data || err.message);
 
       const status = err.response?.status || 500;
       const message = err.response?.data?.error || err.message || "Unknown error";
 
       return res.status(status).json({
-        success: false,
         error: message,
       });
     }
@@ -98,8 +100,8 @@ export class WhatsAppController {
 
       console.log("req.body: ",req.body)
       // await this.messageService.sendText(to, "Hello, this is a test text message!");
-      await this.messageService.sendText(to, text, "en_US");
-      
+      const result = await this.messageService.sendText(to, text, "en_US");
+      console.log('result: ', result)
       return res.send("Text message sent!");
     } 
     catch (err) {

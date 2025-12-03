@@ -1,19 +1,20 @@
-import CommonService from "./services.js"
+import UserService from "./services.js"
 import dotenv from "dotenv";
 import pool from "../../../db.js"
 
 dotenv.config();
 
-export class CommonController {
+export class UserController {
   constructor() {
-    this.service  = CommonService;
+    this.service  = UserService;
   }
 
   getAllConfig = async (req, res) => {
     try {
-      console.log('getAllConfig - Current User: ', req.user)
 
       const data = await this.service.getAllConfig();
+
+      console.log('Data from SQL: ', data)
       
       return res.status(200).json({
         success: true,
@@ -138,4 +139,4 @@ export class CommonController {
 
 }
 
-export const commonController = new CommonController();
+export const userController = new UserController();

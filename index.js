@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";    
 import whatsappRoutes from "./src/modules/whatsApp/router.js";
 import commonRoutes from "./src/modules/common/router.js";
+import authRoutes from "./src/modules/auth/router.js";
 import dotenv from "dotenv";
 import { loadConfig } from './src/utils/configService.js'; // Adjust path as needed
 import {types} from 'pg';
@@ -32,6 +33,7 @@ async function startServer() {
 
         app.use("/whatsapp", whatsappRoutes);
         app.use("/common", commonRoutes);
+        app.use("/auth", authRoutes);
         
         // 3. Start the HTTP server
         app.listen(process.env.PORT, () => {
@@ -44,4 +46,4 @@ async function startServer() {
     }
 }
 
-startServer();
+startServer(); 

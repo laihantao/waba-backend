@@ -1,10 +1,9 @@
 import express from "express";
-import { authMiddleware } from "../../utils/authMiddleware.js";
 import {commonController} from "./controller.js";
 
 const router = express.Router();
 
-router.get(`/allConfig`, authMiddleware, commonController.getAllConfig); 
+router.get(`/allConfig`, commonController.getAllConfig); 
 router.get(`/getConfigsByCategory`, commonController.getConfigByCategory); 
 
 router.post(`/updateConfigValueByName`, commonController.updateConfigValueByName); 

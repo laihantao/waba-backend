@@ -33,7 +33,6 @@ class WhatsAppService {
         const api = createWabaAxios(phoneNumberId); 
 
         console.log('\nphoneNumberId: ', phoneNumberId)
-        console.log('api: ', api)
 
         return api.post(`/messages`, {
             messaging_product: "whatsapp",
