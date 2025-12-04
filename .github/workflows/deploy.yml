@@ -47,10 +47,7 @@ jobs:
           USER="${{ github.actor }}"
           COMMIT_HASH="${{ github.sha }}"
           SHORT_HASH=$(echo "${COMMIT_HASH}" | cut -c1-7)
-          # Escape the period in the commit hash for MarkdownV2
-          ESCAPED_SHORT_HASH=$(echo "${SHORT_HASH}" | sed 's/\./\\./g')
-
-          DATETIME=$(date -u +"%d %B %Y, %-I:%M %p")" (UTC +8)"
+          DATETIME=$(date -u +"%d %B %y, %-I:%M %p" --date "+8 hours")" (UTC +8)"
 
           if [ "$STATUS" == "success" ]; then
             STATUS_TEXT="Success ✅"
@@ -58,24 +55,19 @@ jobs:
             STATUS_TEXT="Failed ❌"
           fi
 
-          # 1. Define MSG using a Heredoc for multi-line support.
-          # 2. Use MarkdownV2 syntax (* for bold)
-          # 3. Add a blank line for better spacing (MarkdownV2 requires two newlines for a paragraph break, but Telegram often only needs one).
-
           MSG=$(cat <<EOF
           🚀 Deployment to *${REPO}*
 
-          Status: *${STATUS_TEXT}*
-          Branch: *${BRANCH}*
-          Revision: \`${ESCAPED_SHORT_HASH}\`
-          DateTime: ${DATETIME}
-          Author: ${USER}
+          Revision: $SHORT_HASH
+          Status: $STATUS_TEXT
+          Branch: $BRANCH
+          DateTime: $DATETIME
+          Author: $USER
           EOF
           )
-          
-          # The curl command now uses parse_mode=MarkdownV2
+
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -d parse_mode="MarkdownV2" \
-          --data-urlencode "text=$MSG"
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="HTML" \
+            --data-urlencode "text=$MSG"
 
