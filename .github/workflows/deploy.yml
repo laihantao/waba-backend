@@ -55,9 +55,20 @@ jobs:
             STATUS_TEXT="Failed ❌"
           fi
 
-          MSG="Deployment to Repository: \"$REPO\"\nRevision: $SHORT_HASH\nStatus: $STATUS_TEXT\nBranch: $BRANCH\nDateTime: $DATETIME\nAuthor: $USER"
+          # MSG="Deployment to Repo: \"$REPO\"\nRevision: $SHORT_HASH\nStatus: $STATUS_TEXT\nBranch: $BRANCH\nDateTime: $DATETIME\nAuthor: $USER"
+
+          MSG=$(cat <<EOF
+          Deployment to Repo: "$REPO"
+          Revision: $SHORT_HASH
+          Status: $STATUS_TEXT
+          Branch: $BRANCH
+          DateTime: $DATETIME
+          Author: $USER
+          EOF
+          )
 
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="HTML" \
             --data-urlencode "text=$MSG"
 
