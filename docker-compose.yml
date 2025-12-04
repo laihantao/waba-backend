@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 1. Node.js 应用服务
+  app:
+    build:
+      context: . # 指定 Dockerfile 在当前目录
+      dockerfile: Dockerfile
+    container_name: nodejs_backend_app
+    restart: always # 容器停止时自动重启
+    ports:
+      - "80:3000" # Http default access to port 80, and it route to port 3000 (our nodejs port)
+    environment:
+      # ⚠️ 关键：Node.js 连接数据库时， HOST 必须使用 Docker Compose 服务名
+      DB_HOST: postgresdb 
+      DB_USER: pgAdmin
+      DB_PASSWORD: pgAdmin
+      DB_NAME: admin-panel
+      DB_PORT: 5432
+    depends_on:
+      - postgresdb # 确保数据库先启动
+    networks:
+      - app_network # 确保在同一个网络中通信
+
+  # 2. PostgreSQL 数据库服务
+  postgresdb:
+    image: postgres:16-alpine # 使用官方 Postgres 镜像
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: pgAdmin
+      POSTGRES_PASSWORD: pgAdmin
+      POSTGRES_DB: admin-panel
+    volumes:
+      - db_data:/var/lib/postgresql/data # ⚠️ 关键：将数据持久化到 Volume
+    networks:
+      - app_network
+
+# Docker Volume: 用于持久化数据库数据
+volumes:
+  db_data:
+
+# Docker Network: 允许 app 和 postgresdb 互相通信
+networks:
+  app_network:
+    driver: bridge
