@@ -2,28 +2,52 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: ["main"]   # Run workflow when pushing to main branch
+    branches: ["main"]
+  workflow_dispatch:   # allows manual trigger
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      # 2️⃣ Install dependencies on runner
+      - name: Install dependencies
+        run: npm ci
+
+      # 3️⃣ Run placeholder tests
+      - name: Run tests
+        run: npm test
+
+      # 4️⃣ Deploy to EC2 via SSH
+      - name: Deploy to EC2
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy to EC2
-        run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${{ secrets.EC2_PROJECT_PATH }}
+            git reset --hard        # reset tracked files only
             git pull
-            npm install --production
+            npm ci                  # install dependencies on EC2
             pm2 restart waba-backend
           EOF
+
+      # 5️⃣ Notify Telegram
+      - name: Notify Telegram
+        if: always()   # run even if previous steps failed
+        run: |
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" == "success" ]; then
+            MSG="✅ Deployment succeeded on branch ${{ github.ref_name }}"
+          else
+            MSG="❌ Deployment failed on branch ${{ github.ref_name }}"
+          fi
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d text="$MSG"
