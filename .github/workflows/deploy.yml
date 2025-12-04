@@ -39,15 +39,21 @@ jobs:
 
       # 5️⃣ Notify Telegram
       - name: Notify Telegram
-        if: always()   # run even if previous steps failed
+        if: always()
         run: |
           STATUS="${{ job.status }}"
+          REPO="${{ github.repository }}"       # e.g., yourusername/waba-backend
+          BRANCH="${{ github.ref_name }}"       # branch name
+          USER="${{ github.actor }}"            # who triggered the workflow
+          DATETIME=$(date -u +"%d %B %Y, %H%M" --date "+8 hours")   # UTC+8
+
           if [ "$STATUS" == "success" ]; then
-            MSG="✅ Deployment succeeded on branch ${{ github.ref_name }}"
+            MSG="✅ Deployment \"$REPO\" succeeded on branch \"$BRANCH\".\nDateTime: $DATETIME\nTriggered by $USER"
           else
-            MSG="❌ Deployment failed on branch ${{ github.ref_name }}"
+            MSG="❌ Deployment \"$REPO\" failed on branch \"$BRANCH\".\nDateTime: $DATETIME\nTriggered by $USER"
           fi
 
+          # Send message to Telegram
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d text="$MSG"
