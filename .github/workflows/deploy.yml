@@ -45,15 +45,19 @@ jobs:
           REPO="${{ github.repository }}"
           BRANCH="${{ github.ref_name }}"
           USER="${{ github.actor }}"
+          COMMIT_HASH="${{ github.sha }}"
+          SHORT_HASH=$(echo "${COMMIT_HASH}" | cut -c1-7)
           DATETIME=$(date -u +"%d %B %Y, %-I:%M %p" --date "+8 hours")" (UTC +8)"
 
           if [ "$STATUS" == "success" ]; then
-            MSG="✅ <b>Deployment \"$REPO\" succeeded</b><br>Branch: $BRANCH<br>DateTime: $DATETIME<br>Triggered by: $USER"
+            STATUS_TEXT="Success ✅"
           else
-            MSG="❌ <b>Deployment \"$REPO\" failed</b><br>Branch: $BRANCH<br>DateTime: $DATETIME<br>Triggered by: $USER"
+            STATUS_TEXT="Failed ❌"
           fi
+
+          MSG="Deployment to Repository: \"$REPO\"\nRevision: $SHORT_HASH\nStatus: $STATUS_TEXT\nBranch: $BRANCH\nDateTime: $DATETIME\nAuthor: $USER"
 
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="HTML" \
             --data-urlencode "text=$MSG"
+
