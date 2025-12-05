@@ -23,7 +23,7 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app .
 
 # 暴露 Node.js 监听的端口 (例如 3000 或 8080)
-EXPOSE 8080
+EXPOSE 80:3000
 
 # 启动 Node.js 应用
 CMD ["npm", "start"]

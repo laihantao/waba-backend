@@ -1,41 +1,39 @@
-name: Deploy to EC2
+name: CI/CD Docker Deploy
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:   # allows manual trigger
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      # 2️⃣ Install dependencies on runner
-      - name: Install dependencies
-        run: npm ci
-
-      # 3️⃣ Run placeholder tests
-      - name: Run tests
-        run: npm test
-
-      # 4️⃣ Deploy to EC2 via SSH
-      - name: Deploy to EC2
+      - name: Login to GitHub Container Registry
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ${{ secrets.EC2_PROJECT_PATH }}
-            git reset --hard        # reset tracked files only
-            git pull
-            npm ci                  # install dependencies on EC2
-            pm2 restart waba-backend
-          EOF
+          echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/waba-backend:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/waba-backend:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /var/www/waba-backend-v2
+            docker compose pull
+            docker compose up -d --remove-orphans
 
       # 5️⃣ Notify Telegram
       - name: Notify Telegram
@@ -58,6 +56,7 @@ jobs:
           MSG=$(cat <<EOF
           🚀 Deployment to *${REPO}*
 
+          With *Docker* 🐳
           Revision: $SHORT_HASH
           Status: $STATUS_TEXT
           Branch: $BRANCH
