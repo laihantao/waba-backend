@@ -28,7 +28,7 @@ async function startServer() {
         // app.use(bodyParser.json());
 
         app.get("/", (req, res) => {
-          res.send("Konosuba 2.0");
+          res.send("Konosuba 2.1");
         });
 
         app.use("/whatsapp", whatsappRoutes);
