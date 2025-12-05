@@ -22,13 +22,11 @@ async function startServer() {
         console.log("✅ WABA Configuration loaded successfully.");
 
         // 2. Middleware, Routes, etc.
-        app.use(cors());              // ← 允许所有 frontend 访问
-        app.use(express.json());      // ← 解析 JSON body
-
-        // app.use(bodyParser.json());
+        app.use(cors());
+        app.use(express.json());
 
         app.get("/", (req, res) => {
-          res.send("Konosuba 2.1");
+          res.send("Konosuba 2.2");
         });
 
         app.use("/whatsapp", whatsappRoutes);
